@@ -1,3 +1,8 @@
+{En este proyecto se usa un archivo .bat para ejecutar los comandos CMD
+para cambiar la hora y fecha de windows.
+R13productions®}
+
+
 unit UAct_Hora;
 
 interface
@@ -12,12 +17,15 @@ type
     SimpleDataSet1: TSimpleDataSet;
     DBText1: TDBText;
     DataSource1: TDataSource;
-    Button1: TButton;
+    Bt1: TButton;
     Label1: TLabel;
-    Button2: TButton;
-    procedure FormCreate(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    Bt2: TButton;
+    DBText2: TDBText;
+    Label2: TLabel;
+    procedure Bt1Click(Sender: TObject);
+    procedure Bt2Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
 
   private
     procedure CrearArchivoBat(rutArchivo: string);
@@ -27,21 +35,17 @@ type
 
 var
   Form1: TForm1;
-  cHora, FormatoHora: String;
+  cHora, FormatoHora, cFecha :String;
 implementation
 
 {$R *.dfm}
 
-procedure TForm1.FormCreate(Sender: TObject);
-begin
-SimpleDataSet1.Open;
-end;
-
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.Bt1Click(Sender: TObject);
 begin
 Label1.Caption:= FormatDateTime('hh:mm:ss am/pm', now);
 if Label1.Caption <> DBText1.Caption then
 begin
+cFecha:= DBText2.Caption;
 Label1.Caption:= DBText1.Caption;
 cHora:= Label1.Caption;
 SetLength(cHora, 8);
@@ -64,16 +68,33 @@ procedure TForm1.CrearArchivoBat(rutArchivo: string);
    try
      temp.Add('@echo off');
      temp.Add('time ' + cHora);
+     temp.Add('date ' + cFecha);
      temp.SaveToFile(rutArchivo);
    finally
      temp.Free;
    end;
  end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TForm1.Bt2Click(Sender: TObject);
 begin
-CrearArchivoBat('C:\archivo.bat');
-shellexecute(Handle, 'open','c:\archivo.bat',nil,nil,SW_HIDE);
+CrearArchivoBat('D:\archivo.bat');
+shellexecute(Handle, 'open','D:\archivo.bat',nil,nil,SW_HIDE);
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+SimpleDataSet1.Open;
+SimpleDataSet1.Connection:= SQLConnection1;
+Bt1.Click;
+Bt2.Click;
+SimpleDataSet1.Close;
+Form1.Close;
+end;
+
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+ShowMessage('La fecha y hora han sido actualizadas con el servidor'
++ cHora + ' ' + cFecha)
 end;
 
 end.
